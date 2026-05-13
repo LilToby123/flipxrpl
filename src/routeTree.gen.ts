@@ -19,6 +19,7 @@ import { Route as ToolsExplorerRouteImport } from './routes/tools/explorer'
 import { Route as GamesLotteryRouteImport } from './routes/games/lottery'
 import { Route as GamesDiceRouteImport } from './routes/games/dice'
 import { Route as GamesCrashRouteImport } from './routes/games/crash'
+import { Route as GamesCoinflipRouteImport } from './routes/games/coinflip'
 import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated/wallet'
 
 const AuthRoute = AuthRouteImport.update({
@@ -70,6 +71,11 @@ const GamesCrashRoute = GamesCrashRouteImport.update({
   path: '/games/crash',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GamesCoinflipRoute = GamesCoinflipRouteImport.update({
+  id: '/games/coinflip',
+  path: '/games/coinflip',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedWalletRoute = AuthenticatedWalletRouteImport.update({
   id: '/wallet',
   path: '/wallet',
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/wallet': typeof AuthenticatedWalletRoute
+  '/games/coinflip': typeof GamesCoinflipRoute
   '/games/crash': typeof GamesCrashRoute
   '/games/dice': typeof GamesDiceRoute
   '/games/lottery': typeof GamesLotteryRoute
@@ -92,6 +99,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/wallet': typeof AuthenticatedWalletRoute
+  '/games/coinflip': typeof GamesCoinflipRoute
   '/games/crash': typeof GamesCrashRoute
   '/games/dice': typeof GamesDiceRoute
   '/games/lottery': typeof GamesLotteryRoute
@@ -106,6 +114,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/wallet': typeof AuthenticatedWalletRoute
+  '/games/coinflip': typeof GamesCoinflipRoute
   '/games/crash': typeof GamesCrashRoute
   '/games/dice': typeof GamesDiceRoute
   '/games/lottery': typeof GamesLotteryRoute
@@ -120,6 +129,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/wallet'
+    | '/games/coinflip'
     | '/games/crash'
     | '/games/dice'
     | '/games/lottery'
@@ -132,6 +142,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/wallet'
+    | '/games/coinflip'
     | '/games/crash'
     | '/games/dice'
     | '/games/lottery'
@@ -145,6 +156,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/wallet'
+    | '/games/coinflip'
     | '/games/crash'
     | '/games/dice'
     | '/games/lottery'
@@ -158,6 +170,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AuthRoute: typeof AuthRoute
+  GamesCoinflipRoute: typeof GamesCoinflipRoute
   GamesCrashRoute: typeof GamesCrashRoute
   GamesDiceRoute: typeof GamesDiceRoute
   GamesLotteryRoute: typeof GamesLotteryRoute
@@ -239,6 +252,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GamesCrashRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/games/coinflip': {
+      id: '/games/coinflip'
+      path: '/games/coinflip'
+      fullPath: '/games/coinflip'
+      preLoaderRoute: typeof GamesCoinflipRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/wallet': {
       id: '/_authenticated/wallet'
       path: '/wallet'
@@ -265,6 +285,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AuthRoute: AuthRoute,
+  GamesCoinflipRoute: GamesCoinflipRoute,
   GamesCrashRoute: GamesCrashRoute,
   GamesDiceRoute: GamesDiceRoute,
   GamesLotteryRoute: GamesLotteryRoute,
@@ -276,3 +297,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
