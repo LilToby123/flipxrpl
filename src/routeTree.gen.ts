@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ToolsIndexRouteImport } from './routes/tools/index'
 import { Route as ToolsTrustlinesRouteImport } from './routes/tools/trustlines'
@@ -18,10 +19,15 @@ import { Route as ToolsExplorerRouteImport } from './routes/tools/explorer'
 import { Route as GamesLotteryRouteImport } from './routes/games/lottery'
 import { Route as GamesDiceRouteImport } from './routes/games/dice'
 import { Route as GamesCrashRouteImport } from './routes/games/crash'
+import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated/wallet'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -64,10 +70,16 @@ const GamesCrashRoute = GamesCrashRouteImport.update({
   path: '/games/crash',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedWalletRoute = AuthenticatedWalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/wallet': typeof AuthenticatedWalletRoute
   '/games/crash': typeof GamesCrashRoute
   '/games/dice': typeof GamesDiceRoute
   '/games/lottery': typeof GamesLotteryRoute
@@ -79,6 +91,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/wallet': typeof AuthenticatedWalletRoute
   '/games/crash': typeof GamesCrashRoute
   '/games/dice': typeof GamesDiceRoute
   '/games/lottery': typeof GamesLotteryRoute
@@ -90,7 +103,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/wallet': typeof AuthenticatedWalletRoute
   '/games/crash': typeof GamesCrashRoute
   '/games/dice': typeof GamesDiceRoute
   '/games/lottery': typeof GamesLotteryRoute
@@ -104,6 +119,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/wallet'
     | '/games/crash'
     | '/games/dice'
     | '/games/lottery'
@@ -115,6 +131,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/wallet'
     | '/games/crash'
     | '/games/dice'
     | '/games/lottery'
@@ -125,7 +142,9 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/auth'
+    | '/_authenticated/wallet'
     | '/games/crash'
     | '/games/dice'
     | '/games/lottery'
@@ -137,6 +156,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AuthRoute: typeof AuthRoute
   GamesCrashRoute: typeof GamesCrashRoute
   GamesDiceRoute: typeof GamesDiceRoute
@@ -154,6 +174,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -212,11 +239,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GamesCrashRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/wallet': {
+      id: '/_authenticated/wallet'
+      path: '/wallet'
+      fullPath: '/wallet'
+      preLoaderRoute: typeof AuthenticatedWalletRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedWalletRoute: typeof AuthenticatedWalletRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedWalletRoute: AuthenticatedWalletRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AuthRoute: AuthRoute,
   GamesCrashRoute: GamesCrashRoute,
   GamesDiceRoute: GamesDiceRoute,
