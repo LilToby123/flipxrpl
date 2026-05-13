@@ -9,38 +9,213 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ToolsIndexRouteImport } from './routes/tools/index'
+import { Route as ToolsTrustlinesRouteImport } from './routes/tools/trustlines'
+import { Route as ToolsSendRouteImport } from './routes/tools/send'
+import { Route as ToolsExplorerRouteImport } from './routes/tools/explorer'
+import { Route as GamesLotteryRouteImport } from './routes/games/lottery'
+import { Route as GamesDiceRouteImport } from './routes/games/dice'
+import { Route as GamesCrashRouteImport } from './routes/games/crash'
+import { Route as GamesCoinflipRouteImport } from './routes/games/coinflip'
+import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated/wallet'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ToolsIndexRoute = ToolsIndexRouteImport.update({
+  id: '/tools/',
+  path: '/tools/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsTrustlinesRoute = ToolsTrustlinesRouteImport.update({
+  id: '/tools/trustlines',
+  path: '/tools/trustlines',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsSendRoute = ToolsSendRouteImport.update({
+  id: '/tools/send',
+  path: '/tools/send',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsExplorerRoute = ToolsExplorerRouteImport.update({
+  id: '/tools/explorer',
+  path: '/tools/explorer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesLotteryRoute = GamesLotteryRouteImport.update({
+  id: '/games/lottery',
+  path: '/games/lottery',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesDiceRoute = GamesDiceRouteImport.update({
+  id: '/games/dice',
+  path: '/games/dice',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesCrashRoute = GamesCrashRouteImport.update({
+  id: '/games/crash',
+  path: '/games/crash',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesCoinflipRoute = GamesCoinflipRouteImport.update({
+  id: '/games/coinflip',
+  path: '/games/coinflip',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedWalletRoute = AuthenticatedWalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/wallet': typeof AuthenticatedWalletRoute
+  '/games/coinflip': typeof GamesCoinflipRoute
+  '/games/crash': typeof GamesCrashRoute
+  '/games/dice': typeof GamesDiceRoute
+  '/games/lottery': typeof GamesLotteryRoute
+  '/tools/explorer': typeof ToolsExplorerRoute
+  '/tools/send': typeof ToolsSendRoute
+  '/tools/trustlines': typeof ToolsTrustlinesRoute
+  '/tools/': typeof ToolsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/wallet': typeof AuthenticatedWalletRoute
+  '/games/coinflip': typeof GamesCoinflipRoute
+  '/games/crash': typeof GamesCrashRoute
+  '/games/dice': typeof GamesDiceRoute
+  '/games/lottery': typeof GamesLotteryRoute
+  '/tools/explorer': typeof ToolsExplorerRoute
+  '/tools/send': typeof ToolsSendRoute
+  '/tools/trustlines': typeof ToolsTrustlinesRoute
+  '/tools': typeof ToolsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/_authenticated/wallet': typeof AuthenticatedWalletRoute
+  '/games/coinflip': typeof GamesCoinflipRoute
+  '/games/crash': typeof GamesCrashRoute
+  '/games/dice': typeof GamesDiceRoute
+  '/games/lottery': typeof GamesLotteryRoute
+  '/tools/explorer': typeof ToolsExplorerRoute
+  '/tools/send': typeof ToolsSendRoute
+  '/tools/trustlines': typeof ToolsTrustlinesRoute
+  '/tools/': typeof ToolsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/sitemap.xml'
+    | '/wallet'
+    | '/games/coinflip'
+    | '/games/crash'
+    | '/games/dice'
+    | '/games/lottery'
+    | '/tools/explorer'
+    | '/tools/send'
+    | '/tools/trustlines'
+    | '/tools/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/sitemap.xml'
+    | '/wallet'
+    | '/games/coinflip'
+    | '/games/crash'
+    | '/games/dice'
+    | '/games/lottery'
+    | '/tools/explorer'
+    | '/tools/send'
+    | '/tools/trustlines'
+    | '/tools'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/sitemap.xml'
+    | '/_authenticated/wallet'
+    | '/games/coinflip'
+    | '/games/crash'
+    | '/games/dice'
+    | '/games/lottery'
+    | '/tools/explorer'
+    | '/tools/send'
+    | '/tools/trustlines'
+    | '/tools/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  GamesCoinflipRoute: typeof GamesCoinflipRoute
+  GamesCrashRoute: typeof GamesCrashRoute
+  GamesDiceRoute: typeof GamesDiceRoute
+  GamesLotteryRoute: typeof GamesLotteryRoute
+  ToolsExplorerRoute: typeof ToolsExplorerRoute
+  ToolsSendRoute: typeof ToolsSendRoute
+  ToolsTrustlinesRoute: typeof ToolsTrustlinesRoute
+  ToolsIndexRoute: typeof ToolsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +223,98 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tools/': {
+      id: '/tools/'
+      path: '/tools'
+      fullPath: '/tools/'
+      preLoaderRoute: typeof ToolsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/trustlines': {
+      id: '/tools/trustlines'
+      path: '/tools/trustlines'
+      fullPath: '/tools/trustlines'
+      preLoaderRoute: typeof ToolsTrustlinesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/send': {
+      id: '/tools/send'
+      path: '/tools/send'
+      fullPath: '/tools/send'
+      preLoaderRoute: typeof ToolsSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/explorer': {
+      id: '/tools/explorer'
+      path: '/tools/explorer'
+      fullPath: '/tools/explorer'
+      preLoaderRoute: typeof ToolsExplorerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/lottery': {
+      id: '/games/lottery'
+      path: '/games/lottery'
+      fullPath: '/games/lottery'
+      preLoaderRoute: typeof GamesLotteryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/dice': {
+      id: '/games/dice'
+      path: '/games/dice'
+      fullPath: '/games/dice'
+      preLoaderRoute: typeof GamesDiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/crash': {
+      id: '/games/crash'
+      path: '/games/crash'
+      fullPath: '/games/crash'
+      preLoaderRoute: typeof GamesCrashRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/coinflip': {
+      id: '/games/coinflip'
+      path: '/games/coinflip'
+      fullPath: '/games/coinflip'
+      preLoaderRoute: typeof GamesCoinflipRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/wallet': {
+      id: '/_authenticated/wallet'
+      path: '/wallet'
+      fullPath: '/wallet'
+      preLoaderRoute: typeof AuthenticatedWalletRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedWalletRoute: typeof AuthenticatedWalletRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedWalletRoute: AuthenticatedWalletRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AuthRoute: AuthRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
+  GamesCoinflipRoute: GamesCoinflipRoute,
+  GamesCrashRoute: GamesCrashRoute,
+  GamesDiceRoute: GamesDiceRoute,
+  GamesLotteryRoute: GamesLotteryRoute,
+  ToolsExplorerRoute: ToolsExplorerRoute,
+  ToolsSendRoute: ToolsSendRoute,
+  ToolsTrustlinesRoute: ToolsTrustlinesRoute,
+  ToolsIndexRoute: ToolsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
