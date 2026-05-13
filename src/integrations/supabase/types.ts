@@ -14,7 +14,313 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      balances: {
+        Row: {
+          drops: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          drops?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          drops?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "balances_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bets: {
+        Row: {
+          client_seed: string
+          created_at: string
+          game: string
+          id: string
+          multiplier: number
+          nonce: number
+          outcome: Json
+          payout_drops: number
+          seed_id: string | null
+          user_id: string
+          wager_drops: number
+        }
+        Insert: {
+          client_seed: string
+          created_at?: string
+          game: string
+          id?: string
+          multiplier?: number
+          nonce: number
+          outcome: Json
+          payout_drops?: number
+          seed_id?: string | null
+          user_id: string
+          wager_drops: number
+        }
+        Update: {
+          client_seed?: string
+          created_at?: string
+          game?: string
+          id?: string
+          multiplier?: number
+          nonce?: number
+          outcome?: Json
+          payout_drops?: number
+          seed_id?: string | null
+          user_id?: string
+          wager_drops?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bets_seed_id_fkey"
+            columns: ["seed_id"]
+            isOneToOne: false
+            referencedRelation: "server_seeds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deposits: {
+        Row: {
+          created_at: string
+          drops: number
+          id: string
+          ledger_index: number
+          network: string
+          tx_hash: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          drops: number
+          id?: string
+          ledger_index: number
+          network: string
+          tx_hash: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          drops?: number
+          id?: string
+          ledger_index?: number
+          network?: string
+          tx_hash?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deposits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lottery_rounds: {
+        Row: {
+          created_at: string
+          draw_at: string
+          id: string
+          pot_drops: number
+          status: string
+          ticket_price_drops: number
+          winner_user_id: string | null
+          winning_ticket: string | null
+        }
+        Insert: {
+          created_at?: string
+          draw_at: string
+          id?: string
+          pot_drops?: number
+          status?: string
+          ticket_price_drops: number
+          winner_user_id?: string | null
+          winning_ticket?: string | null
+        }
+        Update: {
+          created_at?: string
+          draw_at?: string
+          id?: string
+          pot_drops?: number
+          status?: string
+          ticket_price_drops?: number
+          winner_user_id?: string | null
+          winning_ticket?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lottery_rounds_winner_user_id_fkey"
+            columns: ["winner_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lottery_tickets: {
+        Row: {
+          created_at: string
+          id: string
+          round_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          round_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          round_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lottery_tickets_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "lottery_rounds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lottery_tickets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          destination_tag: number
+          display_name: string | null
+          id: string
+          xrpl_address: string
+        }
+        Insert: {
+          created_at?: string
+          destination_tag: number
+          display_name?: string | null
+          id: string
+          xrpl_address: string
+        }
+        Update: {
+          created_at?: string
+          destination_tag?: number
+          display_name?: string | null
+          id?: string
+          xrpl_address?: string
+        }
+        Relationships: []
+      }
+      server_seeds: {
+        Row: {
+          active: boolean
+          client_seed: string
+          created_at: string
+          id: string
+          nonce: number
+          revealed_at: string | null
+          seed: string
+          seed_hash: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          client_seed?: string
+          created_at?: string
+          id?: string
+          nonce?: number
+          revealed_at?: string | null
+          seed: string
+          seed_hash: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          client_seed?: string
+          created_at?: string
+          id?: string
+          nonce?: number
+          revealed_at?: string | null
+          seed?: string
+          seed_hash?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "server_seeds_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      withdrawals: {
+        Row: {
+          created_at: string
+          drops: number
+          error: string | null
+          id: string
+          status: Database["public"]["Enums"]["withdrawal_status"]
+          to_address: string
+          tx_hash: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          drops: number
+          error?: string | null
+          id?: string
+          status?: Database["public"]["Enums"]["withdrawal_status"]
+          to_address: string
+          tx_hash?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          drops?: number
+          error?: string | null
+          id?: string
+          status?: Database["public"]["Enums"]["withdrawal_status"]
+          to_address?: string
+          tx_hash?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "withdrawals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +329,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      withdrawal_status: "pending" | "sent" | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +456,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      withdrawal_status: ["pending", "sent", "failed"],
+    },
   },
 } as const
