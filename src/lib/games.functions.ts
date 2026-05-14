@@ -1,39 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { createHmac, randomBytes, createHash } from "crypto";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
-
-const MIN_BET = 100_000;       // 0.1 XRP
-const MAX_BET = 1_000_000_000; // 1000 XRP
-
-/** Get-or-create the active server seed for a user (only seed_hash is exposed). */
-async function getOrCreateActiveSeed(userId: string) {
-  const { data: existing } = await supabaseAdmin
-    .from("server_seeds")
-    .select("id, seed, seed_hash, nonce")
-    .eq("user_id", userId)
-    .eq("active", true)
-    .maybeSingle();
-  if (existing) return existing as { id: string; seed: string; seed_hash: string; nonce: number };
-
-  const seed = randomBytes(32).toString("hex");
-  const seed_hash = createHash("sha256").update(seed).digest("hex");
-  const { data, error } = await supabaseAdmin
-    .from("server_seeds")
-    .insert({ user_id: userId, seed, seed_hash, nonce: 0, active: true })
-    .select("id, seed, seed_hash, nonce")
-    .single();
-  if (error) throw error;
-  return data as { id: string; seed: string; seed_hash: string; nonce: number };
-}
-
-/** Roll a number in [0, 1) from HMAC-SHA256(server_seed, client_seed:nonce). */
-function rollFloat(serverSeed: string, clientSeed: string, nonce: number): number {
-  const h = createHmac("sha256", serverSeed).update(`${clientSeed}:${nonce}`).digest("hex");
-  // Take first 8 hex chars => 32-bit int, divide by 2^32
-  return parseInt(h.slice(0, 8), 16) / 0x1_0000_0000;
-}
+import { getOrCreateActiveSeed, rollFloat, supabaseAdmin, MIN_BET, MAX_BET } from "./games-internal.server";
 
 /** Returns the active seed_hash for the current user (the commit). */
 export const getActiveSeedHash = createServerFn({ method: "GET" })
