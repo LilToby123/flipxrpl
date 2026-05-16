@@ -1,18 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import type {} from "@tanstack/react-start";
 
 const BASE_URL = "";
 
 const entries = [
   { path: "/", priority: "1.0", changefreq: "weekly" as const },
   { path: "/games/coinflip", priority: "0.9", changefreq: "weekly" as const },
-  { path: "/games/dice", priority: "0.7", changefreq: "weekly" as const },
-  { path: "/games/crash", priority: "0.7", changefreq: "weekly" as const },
-  { path: "/games/lottery", priority: "0.7", changefreq: "weekly" as const },
-  { path: "/tools", priority: "0.6", changefreq: "monthly" as const },
-  { path: "/tools/explorer", priority: "0.5", changefreq: "monthly" as const },
-  { path: "/tools/send", priority: "0.5", changefreq: "monthly" as const },
-  { path: "/tools/trustlines", priority: "0.5", changefreq: "monthly" as const },
   { path: "/auth", priority: "0.4", changefreq: "monthly" as const },
 ];
 
