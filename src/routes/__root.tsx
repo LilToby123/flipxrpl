@@ -72,9 +72,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "RippleFlip — Provably fair XRP coin flip" },
+      { title: "FlipXRPL — Provably fair XRP coin flip" },
       { name: "description", content: "Flip a coin, double your XRP. Provably fair on the XRP Ledger. Try the free demo, withdraw anytime." },
-      { property: "og:title", content: "RippleFlip — Provably fair XRP coin flip" },
+      { property: "og:title", content: "FlipXRPL — Provably fair XRP coin flip" },
       { property: "og:description", content: "Flip a coin, double your XRP. Free demo mode." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
