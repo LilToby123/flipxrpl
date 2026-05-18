@@ -11,7 +11,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/wallet")({
-  head: () => ({ meta: [{ title: "Wallet — RippleFlip" }] }),
+  head: () => ({ meta: [{ title: "Wallet — FlipXRPL" }] }),
   component: WalletPage,
 });
 

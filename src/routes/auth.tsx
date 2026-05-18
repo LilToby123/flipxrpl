@@ -108,7 +108,7 @@ function AuthPage() {
     try {
       if (emailMode === "reset") {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/auth?mode=signin`,
+          redirectTo: `${window.location.origin}/reset-password`,
         });
         if (error) throw error;
         toast.success("Password reset email sent — check your inbox");
