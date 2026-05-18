@@ -9,16 +9,35 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GamesCoinflipRouteImport } from './routes/games/coinflip'
+import { Route as ApiVerifyRouteImport } from './routes/api/verify'
 import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated/wallet'
 
+const VerifyRoute = VerifyRouteImport.update({
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeaderboardRoute = LeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -40,6 +59,11 @@ const GamesCoinflipRoute = GamesCoinflipRouteImport.update({
   path: '/games/coinflip',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiVerifyRoute = ApiVerifyRouteImport.update({
+  id: '/api/verify',
+  path: '/api/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedWalletRoute = AuthenticatedWalletRouteImport.update({
   id: '/wallet',
   path: '/wallet',
@@ -49,15 +73,23 @@ const AuthenticatedWalletRoute = AuthenticatedWalletRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/leaderboard': typeof LeaderboardRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/verify': typeof VerifyRoute
   '/wallet': typeof AuthenticatedWalletRoute
+  '/api/verify': typeof ApiVerifyRoute
   '/games/coinflip': typeof GamesCoinflipRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/leaderboard': typeof LeaderboardRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/verify': typeof VerifyRoute
   '/wallet': typeof AuthenticatedWalletRoute
+  '/api/verify': typeof ApiVerifyRoute
   '/games/coinflip': typeof GamesCoinflipRoute
 }
 export interface FileRoutesById {
@@ -65,22 +97,48 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/auth': typeof AuthRoute
+  '/leaderboard': typeof LeaderboardRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/verify': typeof VerifyRoute
   '/_authenticated/wallet': typeof AuthenticatedWalletRoute
+  '/api/verify': typeof ApiVerifyRoute
   '/games/coinflip': typeof GamesCoinflipRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/sitemap.xml' | '/wallet' | '/games/coinflip'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/leaderboard'
+    | '/reset-password'
+    | '/sitemap.xml'
+    | '/verify'
+    | '/wallet'
+    | '/api/verify'
+    | '/games/coinflip'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/sitemap.xml' | '/wallet' | '/games/coinflip'
+  to:
+    | '/'
+    | '/auth'
+    | '/leaderboard'
+    | '/reset-password'
+    | '/sitemap.xml'
+    | '/verify'
+    | '/wallet'
+    | '/api/verify'
+    | '/games/coinflip'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/leaderboard'
+    | '/reset-password'
     | '/sitemap.xml'
+    | '/verify'
     | '/_authenticated/wallet'
+    | '/api/verify'
     | '/games/coinflip'
   fileRoutesById: FileRoutesById
 }
@@ -88,17 +146,42 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AuthRoute: typeof AuthRoute
+  LeaderboardRoute: typeof LeaderboardRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  VerifyRoute: typeof VerifyRoute
+  ApiVerifyRoute: typeof ApiVerifyRoute
   GamesCoinflipRoute: typeof GamesCoinflipRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/verify': {
+      id: '/verify'
+      path: '/verify'
+      fullPath: '/verify'
+      preLoaderRoute: typeof VerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/leaderboard': {
+      id: '/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof LeaderboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -129,6 +212,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GamesCoinflipRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/verify': {
+      id: '/api/verify'
+      path: '/api/verify'
+      fullPath: '/api/verify'
+      preLoaderRoute: typeof ApiVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/wallet': {
       id: '/_authenticated/wallet'
       path: '/wallet'
@@ -155,7 +245,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AuthRoute: AuthRoute,
+  LeaderboardRoute: LeaderboardRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  VerifyRoute: VerifyRoute,
+  ApiVerifyRoute: ApiVerifyRoute,
   GamesCoinflipRoute: GamesCoinflipRoute,
 }
 export const routeTree = rootRouteImport
