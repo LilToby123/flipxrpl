@@ -189,7 +189,8 @@ function CoinFlip() {
                 <Sparkles className="mr-1 inline h-3 w-3" /> Demo
               </button>
               <button
-< truncated lines 192-196 >
+                onClick={() => setDemoMode(false)}
+                className={`rounded px-3 py-1.5 transition ${!demoMode ? "bg-gradient-gold text-primary-foreground shadow-gold" : "text-muted-foreground"}`}
               >
                 Real XRP
               </button>
