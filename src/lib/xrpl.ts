@@ -17,6 +17,6 @@ export function isLikelyXrplAddress(addr: string): boolean {
 }
 
 export const XRPL_NETWORK_LABEL =
-  (typeof process !== "undefined" && process.env?.XRPL_NETWORK?.includes("altnet"))
+  typeof process !== "undefined" && process.env?.XRPL_NETWORK?.includes("altnet")
     ? "Testnet"
     : "Mainnet";

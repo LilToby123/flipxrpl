@@ -78,7 +78,16 @@ export async function checkXamanStatus(uuid: string): Promise<{
 // and a deterministic password (the address itself is not secret; the Xaman
 // signature is the authentication proof). Then issue a session token.
 
-export async function getOrCreateXrplUser(xrplAddress: string) {
+/**
+ * Mint a Supabase session for an XRPL address.
+ * Returns an OTP token_hash + email the client uses with
+ * `supabase.auth.verifyOtp({ token_hash, type: 'magiclink' })` to establish a session.
+ */
+export async function getOrCreateXrplUser(xrplAddress: string): Promise<{
+  userId: string;
+  email: string;
+  token_hash: string;
+}> {
   const { createClient } = await import("@supabase/supabase-js");
   const admin = createClient(
     process.env.SUPABASE_URL ?? "",
@@ -86,15 +95,16 @@ export async function getOrCreateXrplUser(xrplAddress: string) {
   );
 
   const fakeEmail = `${xrplAddress.toLowerCase()}@xrpl.flipxrpl.internal`;
-  // Try to sign in first (user exists)
-  const { data: existing } = await admin.auth.admin.listUsers();
-  const existingUser = existing?.users?.find((u) => u.email === fakeEmail);
+
+  // Look up existing user by email (paginate defensively)
+  let existingUser: { id: string } | undefined;
+  const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+  existingUser = list?.users?.find((u) => u.email === fakeEmail) as { id: string } | undefined;
 
   let userId: string;
   if (existingUser) {
     userId = existingUser.id;
   } else {
-    // Create new user
     const { data: newUser, error } = await admin.auth.admin.createUser({
       email: fakeEmail,
       email_confirm: true,
@@ -103,23 +113,20 @@ export async function getOrCreateXrplUser(xrplAddress: string) {
     if (error || !newUser.user) throw new Error(`Could not create user: ${error?.message}`);
     userId = newUser.user.id;
 
-    // Ensure profile row exists
-    await admin.from("profiles").upsert({
-      id: userId,
-      xrpl_address: xrplAddress,
-      destination_tag: Math.floor(Math.random() * 4_294_967_295),
-    });
-
-    // Ensure balance row exists
-    await admin.from("balances").upsert({ user_id: userId, drops: 0 });
+    // Profile + balance get created by the handle_new_user trigger; backfill xrpl_address.
+    await admin.from("profiles").update({ xrpl_address: xrplAddress }).eq("id", userId);
   }
 
-  // Issue a magic link / session token the client can use
+  // Generate a magiclink so we can extract the hashed token for the client.
   const { data: link, error: linkErr } = await admin.auth.admin.generateLink({
     type: "magiclink",
     email: fakeEmail,
   });
-  if (linkErr || !link) throw new Error("Could not generate session link");
+  if (linkErr || !link?.properties) throw new Error("Could not generate session token");
 
-  return { userId, sessionLink: link.properties?.action_link ?? "" };
+  return {
+    userId,
+    email: fakeEmail,
+    token_hash: link.properties.hashed_token,
+  };
 }

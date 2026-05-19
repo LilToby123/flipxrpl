@@ -69,13 +69,20 @@ function AuthPage() {
           clearInterval(interval);
           setXamanPolling(false);
           setXamanQr(null);
-          // Backend should have created a Supabase session by now
-          const { data: sessionData } = await supabase.auth.getSession();
-          if (sessionData.session) {
-            toast.success("Signed in with Xaman!");
-            navigate({ to: "/wallet" });
+          // Exchange the magiclink token for a Supabase session
+          if (data.token_hash) {
+            const { error } = await supabase.auth.verifyOtp({
+              token_hash: data.token_hash,
+              type: "magiclink",
+            });
+            if (error) {
+              toast.error(`Session error: ${error.message}`);
+            } else {
+              toast.success(`Signed in as ${data.address.slice(0, 6)}…${data.address.slice(-4)}`);
+              navigate({ to: "/wallet" });
+            }
           } else {
-            toast.error("Session not found — try again");
+            toast.error("No session token returned");
           }
           setBusy(false);
         } else if (data.expired) {
