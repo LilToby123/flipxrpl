@@ -135,12 +135,36 @@ export type Database = {
           },
         ]
       }
+      house_treasury_snapshots: {
+        Row: {
+          created_at: string
+          drops: number
+          id: string
+          liabilities_drops: number
+        }
+        Insert: {
+          created_at?: string
+          drops: number
+          id?: string
+          liabilities_drops?: number
+        }
+        Update: {
+          created_at?: string
+          drops?: number
+          id?: string
+          liabilities_drops?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
           destination_tag: number
           display_name: string | null
           id: string
+          referral_code: string | null
+          referral_earnings_drops: number
+          referred_by: string | null
           xrpl_address: string
         }
         Insert: {
@@ -148,6 +172,9 @@ export type Database = {
           destination_tag: number
           display_name?: string | null
           id: string
+          referral_code?: string | null
+          referral_earnings_drops?: number
+          referred_by?: string | null
           xrpl_address: string
         }
         Update: {
@@ -155,9 +182,20 @@ export type Database = {
           destination_tag?: number
           display_name?: string | null
           id?: string
+          referral_code?: string | null
+          referral_earnings_drops?: number
+          referred_by?: string | null
           xrpl_address?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_referred_by_fkey"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       server_seeds: {
         Row: {
@@ -249,7 +287,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_referral_code: { Args: never; Returns: string }
     }
     Enums: {
       withdrawal_status: "pending" | "sent" | "failed"
