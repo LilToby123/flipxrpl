@@ -1,45 +1,58 @@
-# FlipXRPL — Phased Implementation Plan
 
-You've asked for 15 substantial features. Shipping them all in one pass would produce ~30+ new files, a new auth system, a real-money payment loop, and an admin panel — too much to land safely in a single turn without breaking what already works. Here's how I'll stage it. **Please confirm or edit before I start.**
+# FlipXRPL — Full Build Plan
 
-## A few decisions I need from you first
+Massive scope. I'll ship this in 3 phases so each phase is verifiable in preview before moving to the next. All work is additive to what's already built.
 
-1. **Xaman API credentials** — Xaman wallet sign-in (#3) and on-chain bet signing (#8) require `XUMM_API_KEY` and `XUMM_API_SECRET` from https://apps.xumm.dev. Without these, I can scaffold the UI but the buttons won't work. OK to request these secrets?
-2. **Bet signing on-chain (#8)** — Signing *every* coin flip on-chain via Xaman means each bet pops the Xaman app, costs ~10 drops in XRPL fees, and takes 4–5 seconds to confirm. That kills UX for a fast game. Standard pattern is: sign-in once with Xaman (proves wallet ownership), then bets debit the internal balance. Withdrawals are on-chain. **Confirm**: per-bet Xaman signing, or one-time sign-in + balance-based betting?
-3. **Admin "personal wallet" (#9)** — what XRPL r-address should profit withdrawals go to? And the admin password — pick one now or I'll generate one and store it as a secret.
-4. **Edge Function vs server function (#5)** — you wrote "Supabase Edge Function." This stack uses TanStack server functions instead (same security model, house seed stays server-side). OK to use that?
-5. **Mainnet vs testnet** — real XRP movement on mainnet is irreversible. I strongly recommend we wire everything on **testnet first**, verify deposits/withdrawals end-to-end, then flip to mainnet. Agreed?
+## Phase 1 — Foundation: Rebrand, XRPL deps, Xaman sign-in, deposit polling, real withdrawals
 
-## Phased rollout
+1. **Rebrand RippleFlip → FlipXRPL** everywhere (titles, headers, footer, meta tags, sitemap, auth page, wallet page, coinflip page).
+2. **Install `xrpl` package** and verify mainnet WebSocket connection (`wss://xrplcluster.com`). Default `XRPL_NETWORK` to mainnet, keep testnet override.
+3. **Xaman sign-in** (Option A):
+   - `POST /api/xaman/signin` — creates Xumm payload (SignIn), returns QR + UUID.
+   - `GET /api/xaman/status/:uuid` — polls until signed, returns XRPL address.
+   - New `/login-xaman` flow on `/auth` page (tab: Email / Xaman). On success, mints a Supabase session via service-role `signInWithPassword` against an auto-provisioned `<address>@xaman.flipxrpl` account so RLS keeps working.
+   - Existing email/password + forgot-password stays (Option B).
+4. **Deposit poller**: `/api/public/cron/poll-deposits` server route (HMAC-protected via anon key). Pulls last 200 txs to house wallet via XRPL `account_tx`, matches `DestinationTag` → user, credits `balances.drops`, inserts into `deposits` (idempotent on `tx_hash`). Cron job via `pg_cron` + `pg_net` every 30s.
+5. **Real withdrawals**: Wire existing `requestWithdraw` server fn to the live `xrpl` client (currently scaffolded). Atomic balance debit → submit Payment → record tx_hash; refund on failure. House seed read from `HOUSE_WALLET_SEED` env only.
+6. **Bet limits (server-side)**: enforce MIN=1 XRP, MAX=100 XRP, MAX_PCT=10% of treasury. Demo MAX=10 XRP, reset = exactly 100 XRP. DEMO watermark badge always visible in demo mode.
+7. **Rate limit**: 1 bet / 5s per user via lightweight `last_bet_at` column check.
+8. **Quick-bet buttons**: 1 / 5 / 25 / 50 / 100, ½, 2× (already in place — verify clamps to limits).
+9. **Mobile**: re-audit coinflip + landing at 390/430px. Bigger flip CTA, readable type.
 
-### Phase 1 — Foundation (this turn, after you approve)
-- Item 1: Rebrand RippleFlip → FlipXRPL everywhere
-- Item 4: Forgot-password link + `/reset-password` route
-- Item 7: Demo mode polish (10 XRP cap, exact 100 reset, watermark)
-- Item 14: Quick-bet buttons (1/5/25/50/100, 2x, ½)
-- Item 15: Mobile responsiveness pass (390/430px)
-- Item 10: Public `/verify` page (already partially scaffolded)
-- Item 11: Confirm Live Flips realtime works on homepage
+## Phase 2 — Provable fairness page, Live Flips realtime, Leaderboard, SEO, favicon
 
-### Phase 2 — Xaman + on-chain money (next turn)
-- Item 2: Confirm XRPL deps + network connectivity
-- Item 3: Xaman sign-in flow (`/api/xaman/signin` + polling) — assumes secrets added
-- Item 5: Deposit poller (cron-style server fn) + withdrawal server fn
-- Item 6: Server-side bet limits (1 XRP min, 100 XRP max, 10% of treasury cap)
-- Item 8: RLS tightening + 1-bet-per-5s rate limit (per #2 decision above)
+1. **`/verify` page** — public page (UI already exists, polish): paste tx hash → calls `/api/verify` → renders server seed, client seed, nonce, HMAC computation, and roll math step-by-step.
+2. **Live Flips realtime** on home + game page — confirm Supabase Realtime channel subscribes, shows shortened address, choice, wager, win/loss, with proper empty state.
+3. **`/leaderboard`** — 3 sections (biggest single win, most wagered, most profit). Materialized view refreshed daily by `pg_cron`. Show shortened addresses only.
+4. **SEO**: per-route `head()` with title/description/OG/Twitter tags. Description = "Provably fair XRP coin flip — 50/50 odds, 1% house edge, settled on the XRP Ledger in seconds."
+5. **Favicon**: generate a gold-coin SVG/PNG, wire in `__root.tsx`.
+6. **Loading spinners, error boundaries, empty states** across all pages.
 
-### Phase 3 — Growth features (turn after)
-- Item 9: `/admin/<secret>` dashboard with treasury, P&L chart, profit withdraw
-- Item 12: `/leaderboard` (top wins / wagered / profit)
-- Item 13: Referral system (unique link, 0.1% of referee's bets, dashboard widget)
+## Phase 3 — Admin dashboard + Referrals
 
-## Technical notes (skip if non-technical)
+1. **`/admin`** — gated by `ADMIN_PASSWORD` env (POST password → server-issued signed cookie). Shows:
+   - Treasury XRP balance (live from XRPL).
+   - Bet count, total won, total lost.
+   - P&L line chart over time (Recharts) from `bets` aggregation.
+   - "Withdraw profits to my wallet" button → sends to `ADMIN_PAYOUT_ADDRESS`.
+   - Red alert if treasury < 500 XRP.
+2. **Referrals**:
+   - `profiles.referral_code` (unique), `profiles.referred_by` (uuid nullable).
+   - `?ref=CODE` on `/auth` stored in localStorage → attached at signup.
+   - On every settled bet, credit 0.1% of wager to referrer's balance (from house edge — house edge is 1%, so this comes out of margin).
+   - Dashboard widget on `/wallet` shows referral link + total earnings.
 
-- Deposit polling on a Worker runtime needs a scheduled trigger — I'll use a `/api/public/cron/poll-deposits` route hit by pg_cron every 30s, with HMAC signature verification.
-- Rate limiting: per the platform guidelines we don't have first-class rate limit primitives; I'll implement a lightweight `last_bet_at` check in the bets server fn (ad-hoc, acceptable for this use case).
-- Referral payouts come from the house edge (1%), so 0.1% to referrer leaves 0.9% house — math works.
-- Admin password will be bcrypt-hashed and stored as a secret; admin route uses a session cookie after password check.
+## Technical details
 
----
+- **Xaman secrets** (`XUMM_API_KEY`, `XUMM_API_SECRET`) ✅ stored
+- **Admin secrets** (`ADMIN_PASSWORD`, `ADMIN_PAYOUT_ADDRESS`) ✅ stored
+- House wallet secrets (`HOUSE_WALLET_ADDRESS`, `HOUSE_WALLET_SEED`) ✅ already stored
+- Note: `xrpl` package uses native crypto — should work on Cloudflare Workers with `nodejs_compat` (already enabled). If runtime errors appear in workerd, I'll swap to direct WebSocket calls for read-paths and confirm signing path.
+- All bet processing stays in `createServerFn` with `requireSupabaseAuth`. House key never client-side.
+- Migrations: add `referral_code`, `referred_by`, `last_bet_at` to `profiles`; add `referral_earnings_drops` column on `balances`; create `house_treasury_snapshots` table for P&L history; create leaderboard materialized view.
 
-**Reply with answers to the 5 questions above and I'll start Phase 1 immediately.** If you want a different ordering, say so.
+## What I will NOT do
+- I will not implement per-bet Xaman signing (kills UX — every bet would need QR scan). Instead, Xaman sign-in establishes session, then bets are server-authorized against the signed-in wallet. This is the standard on every XRPL gaming site. If you specifically want per-bet Xaman signing, say so and I'll wire it instead.
+- I will not switch to mainnet by default until you confirm the house wallet on mainnet is funded. The plan defaults to mainnet per your request, but I strongly recommend keeping `XRPL_NETWORK=wss://s.altnet.rippletest.net:51233` for the first end-to-end test, then flipping.
+
+Approve and I'll start Phase 1.
