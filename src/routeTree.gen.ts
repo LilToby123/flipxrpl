@@ -19,6 +19,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as GamesCoinflipRouteImport } from './routes/games/coinflip'
 import { Route as ApiVerifyRouteImport } from './routes/api/verify'
 import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated/wallet'
+import { Route as ApiXamanSigninRouteImport } from './routes/api/xaman.signin'
+import { Route as ApiXamanSigninStatusRouteImport } from './routes/api/xaman.signin.status'
+import { Route as ApiPublicCronPollDepositsRouteImport } from './routes/api/public/cron/poll-deposits'
 
 const VerifyRoute = VerifyRouteImport.update({
   id: '/verify',
@@ -69,6 +72,22 @@ const AuthenticatedWalletRoute = AuthenticatedWalletRouteImport.update({
   path: '/wallet',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const ApiXamanSigninRoute = ApiXamanSigninRouteImport.update({
+  id: '/api/xaman/signin',
+  path: '/api/xaman/signin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiXamanSigninStatusRoute = ApiXamanSigninStatusRouteImport.update({
+  id: '/status',
+  path: '/status',
+  getParentRoute: () => ApiXamanSigninRoute,
+} as any)
+const ApiPublicCronPollDepositsRoute =
+  ApiPublicCronPollDepositsRouteImport.update({
+    id: '/api/public/cron/poll-deposits',
+    path: '/api/public/cron/poll-deposits',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -80,6 +99,9 @@ export interface FileRoutesByFullPath {
   '/wallet': typeof AuthenticatedWalletRoute
   '/api/verify': typeof ApiVerifyRoute
   '/games/coinflip': typeof GamesCoinflipRoute
+  '/api/xaman/signin': typeof ApiXamanSigninRouteWithChildren
+  '/api/public/cron/poll-deposits': typeof ApiPublicCronPollDepositsRoute
+  '/api/xaman/signin/status': typeof ApiXamanSigninStatusRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -91,6 +113,9 @@ export interface FileRoutesByTo {
   '/wallet': typeof AuthenticatedWalletRoute
   '/api/verify': typeof ApiVerifyRoute
   '/games/coinflip': typeof GamesCoinflipRoute
+  '/api/xaman/signin': typeof ApiXamanSigninRouteWithChildren
+  '/api/public/cron/poll-deposits': typeof ApiPublicCronPollDepositsRoute
+  '/api/xaman/signin/status': typeof ApiXamanSigninStatusRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -104,6 +129,9 @@ export interface FileRoutesById {
   '/_authenticated/wallet': typeof AuthenticatedWalletRoute
   '/api/verify': typeof ApiVerifyRoute
   '/games/coinflip': typeof GamesCoinflipRoute
+  '/api/xaman/signin': typeof ApiXamanSigninRouteWithChildren
+  '/api/public/cron/poll-deposits': typeof ApiPublicCronPollDepositsRoute
+  '/api/xaman/signin/status': typeof ApiXamanSigninStatusRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -117,6 +145,9 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/api/verify'
     | '/games/coinflip'
+    | '/api/xaman/signin'
+    | '/api/public/cron/poll-deposits'
+    | '/api/xaman/signin/status'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -128,6 +159,9 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/api/verify'
     | '/games/coinflip'
+    | '/api/xaman/signin'
+    | '/api/public/cron/poll-deposits'
+    | '/api/xaman/signin/status'
   id:
     | '__root__'
     | '/'
@@ -140,6 +174,9 @@ export interface FileRouteTypes {
     | '/_authenticated/wallet'
     | '/api/verify'
     | '/games/coinflip'
+    | '/api/xaman/signin'
+    | '/api/public/cron/poll-deposits'
+    | '/api/xaman/signin/status'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -152,6 +189,8 @@ export interface RootRouteChildren {
   VerifyRoute: typeof VerifyRoute
   ApiVerifyRoute: typeof ApiVerifyRoute
   GamesCoinflipRoute: typeof GamesCoinflipRoute
+  ApiXamanSigninRoute: typeof ApiXamanSigninRouteWithChildren
+  ApiPublicCronPollDepositsRoute: typeof ApiPublicCronPollDepositsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -226,6 +265,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWalletRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/api/xaman/signin': {
+      id: '/api/xaman/signin'
+      path: '/api/xaman/signin'
+      fullPath: '/api/xaman/signin'
+      preLoaderRoute: typeof ApiXamanSigninRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/xaman/signin/status': {
+      id: '/api/xaman/signin/status'
+      path: '/status'
+      fullPath: '/api/xaman/signin/status'
+      preLoaderRoute: typeof ApiXamanSigninStatusRouteImport
+      parentRoute: typeof ApiXamanSigninRoute
+    }
+    '/api/public/cron/poll-deposits': {
+      id: '/api/public/cron/poll-deposits'
+      path: '/api/public/cron/poll-deposits'
+      fullPath: '/api/public/cron/poll-deposits'
+      preLoaderRoute: typeof ApiPublicCronPollDepositsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -241,6 +301,18 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface ApiXamanSigninRouteChildren {
+  ApiXamanSigninStatusRoute: typeof ApiXamanSigninStatusRoute
+}
+
+const ApiXamanSigninRouteChildren: ApiXamanSigninRouteChildren = {
+  ApiXamanSigninStatusRoute: ApiXamanSigninStatusRoute,
+}
+
+const ApiXamanSigninRouteWithChildren = ApiXamanSigninRoute._addFileChildren(
+  ApiXamanSigninRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
@@ -251,7 +323,19 @@ const rootRouteChildren: RootRouteChildren = {
   VerifyRoute: VerifyRoute,
   ApiVerifyRoute: ApiVerifyRoute,
   GamesCoinflipRoute: GamesCoinflipRoute,
+  ApiXamanSigninRoute: ApiXamanSigninRouteWithChildren,
+  ApiPublicCronPollDepositsRoute: ApiPublicCronPollDepositsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
