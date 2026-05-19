@@ -36,7 +36,7 @@ export const requestWithdraw = createServerFn({ method: "POST" })
     const { userId } = context;
 
     const seed = process.env.HOUSE_WALLET_SEED;
-    const network = process.env.XRPL_NETWORK ?? "wss://s.altnet.rippletest.net:51233";
+    const network = process.env.XRPL_NETWORK ?? "wss://xrplcluster.com";
     if (!seed) return { ok: false as const, error: "House wallet not configured" };
 
     // 1) Atomic-ish balance check + deduct (gross = drops + fee)
