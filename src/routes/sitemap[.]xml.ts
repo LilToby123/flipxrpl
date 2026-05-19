@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-const BASE_URL = "";
+const BASE_URL = "https://flipxrpl.lovable.app";
 
 const entries = [
   { path: "/", priority: "1.0", changefreq: "weekly" as const },
   { path: "/games/coinflip", priority: "0.9", changefreq: "weekly" as const },
+  { path: "/leaderboard", priority: "0.7", changefreq: "daily" as const },
+  { path: "/verify", priority: "0.6", changefreq: "monthly" as const },
   { path: "/auth", priority: "0.4", changefreq: "monthly" as const },
 ];
 

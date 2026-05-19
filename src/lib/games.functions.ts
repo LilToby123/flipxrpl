@@ -79,6 +79,41 @@ export const placeCoinFlip = createServerFn({ method: "POST" })
       client_seed: data.client_seed,
     });
 
+    // 4) Referral credit: 0.1% of wager to the referrer, paid from house edge
+    try {
+      const { data: profile } = await supabaseAdmin
+        .from("profiles")
+        .select("referred_by")
+        .eq("id", userId)
+        .maybeSingle();
+      const referrer = profile?.referred_by;
+      if (referrer) {
+        const credit = Math.floor(data.wager_drops * 0.001);
+        if (credit > 0) {
+          const { data: refBal } = await supabaseAdmin
+            .from("balances")
+            .select("drops")
+            .eq("user_id", referrer)
+            .maybeSingle();
+          await supabaseAdmin
+            .from("balances")
+            .update({ drops: Number(refBal?.drops ?? 0) + credit, updated_at: new Date().toISOString() })
+            .eq("user_id", referrer);
+          const { data: refProfile } = await supabaseAdmin
+            .from("profiles")
+            .select("referral_earnings_drops")
+            .eq("id", referrer)
+            .maybeSingle();
+          await supabaseAdmin
+            .from("profiles")
+            .update({ referral_earnings_drops: Number(refProfile?.referral_earnings_drops ?? 0) + credit })
+            .eq("id", referrer);
+        }
+      }
+    } catch {
+      // non-fatal
+    }
+
     return {
       ok: true as const,
       win,

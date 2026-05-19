@@ -2,9 +2,10 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Copy, LogOut, ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
+import { Copy, LogOut, ArrowDownToLine, ArrowUpFromLine, Users } from "lucide-react";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { getMyVault, requestWithdraw } from "@/lib/wallet.functions";
+import { getMyReferrals } from "@/lib/referrals.functions";
 import { dropsToXrp, xrpToDrops, isLikelyXrplAddress } from "@/lib/xrpl";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
@@ -19,11 +20,13 @@ function WalletPage() {
   const router = useRouter();
   const fetchVault = useServerFn(getMyVault);
   const withdrawFn = useServerFn(requestWithdraw);
+  const fetchRefs = useServerFn(getMyReferrals);
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["vault"],
     queryFn: () => fetchVault(),
     refetchInterval: 15_000,
   });
+  const { data: refs } = useQuery({ queryKey: ["referrals"], queryFn: () => fetchRefs() });
 
   const [withdrawTo, setWithdrawTo] = useState("");
   const [withdrawXrp, setWithdrawXrp] = useState(1);
@@ -155,6 +158,45 @@ function WalletPage() {
                 </p>
               </div>
             </section>
+
+            {/* Referrals */}
+            {refs && (
+              <section className="mt-6 rounded-xl border border-border/60 bg-card p-6">
+                <h2 className="flex items-center gap-2 font-semibold"><Users className="h-4 w-4 text-accent" /> Referrals</h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Earn 0.1% of every wager from people you invite, paid from the house edge.
+                </p>
+                <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                  <div className="rounded-md border border-border/60 bg-background/40 p-3">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Invited</p>
+                    <p className="mt-1 font-display text-2xl font-bold">{refs.invitedCount}</p>
+                  </div>
+                  <div className="rounded-md border border-border/60 bg-background/40 p-3">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Earned</p>
+                    <p className="mt-1 font-display text-2xl font-bold text-gradient-gold">{dropsToXrp(refs.earningsDrops)} XRP</p>
+                  </div>
+                  <div className="rounded-md border border-border/60 bg-background/40 p-3">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Your code</p>
+                    <p className="mt-1 font-mono text-lg font-semibold">{refs.code || "—"}</p>
+                  </div>
+                </div>
+                {refs.code && (
+                  <div className="mt-4 flex items-center gap-2">
+                    <input
+                      readOnly
+                      value={`${typeof window !== "undefined" ? window.location.origin : ""}/auth?ref=${refs.code}`}
+                      className="flex-1 rounded-md border border-border bg-input px-3 py-2 font-mono text-xs"
+                    />
+                    <button
+                      onClick={() => copy(`${window.location.origin}/auth?ref=${refs.code}`, "Referral link")}
+                      className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-3 py-2 text-xs hover:bg-card/80"
+                    >
+                      <Copy className="h-3.5 w-3.5" /> Copy
+                    </button>
+                  </div>
+                )}
+              </section>
+            )}
           </>
         )}
       </main>

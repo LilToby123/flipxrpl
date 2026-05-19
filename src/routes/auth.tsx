@@ -127,7 +127,12 @@ function AuthPage() {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/wallet` },
+          options: {
+            emailRedirectTo: `${window.location.origin}/wallet`,
+            data: {
+              ref: new URLSearchParams(window.location.search).get("ref") ?? undefined,
+            },
+          },
         });
         if (error) throw error;
         toast.success("Account created — check your email to confirm");
