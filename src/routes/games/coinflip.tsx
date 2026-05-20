@@ -26,7 +26,9 @@ export const Route = createFileRoute("/games/coinflip")({
 type ServerResult = Awaited<ReturnType<typeof placeCoinFlip>>;
 type FlipResult = {
   win: boolean;
-  result_side: "heads" | "tails";
+  result_side: "heads" | "tails";   // true on-chain result
+  display_side: "heads" | "tails";  // shown on coin — always opposite of pick on loss
+  picked: "heads" | "tails";
   payout_drops: number;
   wager_drops: number;
   demo: boolean;
@@ -112,11 +114,12 @@ function CoinFlip() {
     setTimeout(() => {
       const payout = win ? Math.floor(wager * 1.99) : 0;
       setDemoDrops((d) => d - wager + payout);
-      setLast({ win, result_side, payout_drops: payout, wager_drops: wager, demo: true });
+      const display_side: "heads" | "tails" = win ? side : (side === "heads" ? "tails" : "heads");
+      setLast({ win, result_side, display_side, picked: side, payout_drops: payout, wager_drops: wager, demo: true });
       setBusy(false);
       setFlipping(false);
       if (win) toast.success(`Demo win — +${dropsToXrp(payout - wager)} XRP`);
-      else toast(`Demo loss — landed on ${result_side}`);
+      else toast(`Demo loss — landed on ${display_side}`);
     }, 1400);
   }
 
@@ -135,9 +138,13 @@ function CoinFlip() {
       const res: ServerResult = await placeFn({ data: { side, wager_drops: wager, client_seed: clientSeed } });
       await new Promise((r) => setTimeout(r, 1400));
       if (!res.ok) { toast.error(res.error); return; }
+      const rs = res.result_side as "heads" | "tails";
+      const display_side: "heads" | "tails" = res.win ? side : (side === "heads" ? "tails" : "heads");
       setLast({
         win: res.win,
-        result_side: res.result_side as "heads" | "tails",
+        result_side: rs,
+        display_side,
+        picked: side,
         payout_drops: res.payout_drops,
         wager_drops: wager,
         demo: false,
@@ -145,7 +152,7 @@ function CoinFlip() {
       setRealDrops(res.new_balance_drops);
       qc.invalidateQueries({ queryKey: ["vault"] });
       if (res.win) toast.success(`You won ${dropsToXrp(res.payout_drops - wager)} XRP`);
-      else toast(`House wins — landed on ${res.result_side}`);
+      else toast(`House wins — landed on ${display_side}`);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Bet failed";
       toast.error(msg);
@@ -219,15 +226,15 @@ function CoinFlip() {
             <div className="relative h-40 w-40 [perspective:800px] sm:h-48 sm:w-48">
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={(last?.result_side ?? "rest") + (flipping ? "-flipping" : "")}
+                  key={(last?.display_side ?? "rest") + (flipping ? "-flipping" : "")}
                   initial={flipping ? { rotateY: 0 } : { scale: 0.6, opacity: 0 }}
-                  animate={flipping ? { rotateY: 1800 } : { scale: 1, opacity: 1 }}
-                  transition={flipping ? { duration: 1.4, ease: "easeOut" } : { duration: 0.3 }}
-                  className="flex h-full w-full items-center justify-center rounded-full bg-gradient-gold text-primary-foreground shadow-gold [transform-style:preserve-3d]"
+                  animate={flipping ? { rotateY: 1080 } : { scale: 1, opacity: 1 }}
+                  transition={flipping ? { duration: 1.2, ease: "easeOut" } : { duration: 0.3 }}
+                  className="flex h-full w-full items-center justify-center rounded-full bg-primary text-primary-foreground shadow-gold [transform-style:preserve-3d]"
                 >
                   <Coins className="h-16 w-16 sm:h-20 sm:w-20" />
                   <span className="absolute bottom-3 font-display text-sm font-bold uppercase">
-                    {flipping ? "…" : last ? last.result_side : side}
+                    {flipping ? "…" : last ? last.display_side : side}
                   </span>
                 </motion.div>
               </AnimatePresence>
