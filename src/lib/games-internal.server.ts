@@ -1,8 +1,10 @@
 import { createHmac, randomBytes, createHash } from "crypto";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-export const MIN_BET = 100_000;       // 0.1 XRP
-export const MAX_BET = 1_000_000_000; // 1000 XRP
+export const MIN_BET = 1_000_000;     // 1 XRP
+export const MAX_BET = 100_000_000;   // 100 XRP
+export const RATE_LIMIT_MS = 5_000;   // 1 bet / 5s
+export const TREASURY_BET_FRACTION = 0.10; // max 10% of house treasury per bet
 
 export async function getOrCreateActiveSeed(userId: string) {
   const { data: existing } = await supabaseAdmin

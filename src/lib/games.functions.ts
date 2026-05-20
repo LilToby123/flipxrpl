@@ -1,7 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { getOrCreateActiveSeed, rollFloat, supabaseAdmin, MIN_BET, MAX_BET } from "./games-internal.server";
+import {
+  getOrCreateActiveSeed,
+  rollFloat,
+  supabaseAdmin,
+  MIN_BET,
+  MAX_BET,
+  RATE_LIMIT_MS,
+  TREASURY_BET_FRACTION,
+} from "./games-internal.server";
 
 /** Returns the active seed_hash for the current user (the commit). */
 export const getActiveSeedHash = createServerFn({ method: "GET" })
@@ -43,6 +51,33 @@ export const placeCoinFlip = createServerFn({ method: "POST" })
   .inputValidator((d) => CoinFlipInput.parse(d))
   .handler(async ({ data, context }) => {
     const { userId } = context;
+
+    // 0a) Rate limit — 1 bet / 5s per user
+    {
+      const { data: recent } = await supabaseAdmin
+        .from("bets")
+        .select("created_at")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      const last = recent?.[0]?.created_at;
+      if (last && Date.now() - new Date(last).getTime() < RATE_LIMIT_MS) {
+        return { ok: false as const, error: "Slow down — 1 bet every 5 seconds" };
+      }
+    }
+
+    // 0b) Per-bet cap = 10% of total house liabilities
+    {
+      const { data: liabRows } = await supabaseAdmin.from("balances").select("drops");
+      const liabilities = (liabRows ?? []).reduce((s, r) => s + Number(r.drops), 0);
+      if (liabilities > 0) {
+        const cap = Math.floor(liabilities * TREASURY_BET_FRACTION);
+        if (cap > 0 && data.wager_drops > cap) {
+          return { ok: false as const, error: `Bet exceeds 10% of treasury (${Math.floor(cap / 1_000_000)} XRP max)` };
+        }
+      }
+    }
+
     // 1) Lock balance & deduct atomically via RPC-less compare-and-set
     const { data: bal } = await supabaseAdmin
       .from("balances")

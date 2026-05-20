@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { Coins, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import logoUrl from "@/assets/logo.png";
 
 export function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -9,13 +10,8 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2" onClick={() => setMenuOpen(false)}>
-          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-gradient-gold shadow-gold">
-            <Coins className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <span className="font-display text-xl font-bold tracking-tight">
-            Flip<span className="text-gradient-gold">XRPL</span>
-          </span>
+        <Link to="/" className="flex items-center gap-2" onClick={() => setMenuOpen(false)} aria-label="FlipXRPL home">
+          <img src={logoUrl} alt="FlipXRPL" className="h-9 w-auto" />
         </Link>
 
         {/* Desktop nav */}
